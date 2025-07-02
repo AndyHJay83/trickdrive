@@ -149,7 +149,7 @@ class TrickDriveMatrix {
         }
         const schedule = [];
         const minRounds = Math.ceil((totalPeople - 1) / 3); // 3 is the min per table
-        const maxRounds = 9;
+        const maxRounds = 8;
         let round = 0;
         while (round < maxRounds) {
             // Greedy: try to minimize repeats in this round
