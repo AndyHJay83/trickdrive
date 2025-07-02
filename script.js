@@ -171,6 +171,10 @@ class TrickDriveMatrix {
             }
             schedule.push(roundTables);
         }
+        // Defensive fallback: always return an array
+        if (!Array.isArray(schedule) || schedule.length === 0) {
+            return [[]];
+        }
         return schedule;
     }
 
@@ -1601,6 +1605,10 @@ class TrickDriveMatrix {
     }
 
     calculateInteractionStatistics() {
+        // Defensive: if this.schedule is not an array, return no repeats
+        if (!Array.isArray(this.schedule)) {
+            return { maxRepeats: 0, repeatPairs: [] };
+        }
         // Calculate interactions from the generated schedule
         const interactionMatrix = {};
         for (let i = 0; i < this.people.length; i++) {
