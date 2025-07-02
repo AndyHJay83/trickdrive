@@ -14,44 +14,11 @@
         </header>
 
         <div class="input-section">
-            <div class="form-group">
-                <label for="totalPeople">Total Number of People:</label>
-                <input type="number" id="totalPeople" min="4" max="30" value="12" required>
-            </div>
-
-            <div class="form-group">
-                <label for="numTables">Number of Tables:</label>
-                <input type="number" id="numTables" min="2" max="10" value="3" required>
-            </div>
-
-            <div class="form-group">
-                <label for="maxPerTable">Maximum People per Table:</label>
-                <input type="number" id="maxPerTable" min="2" max="6" value="4" required>
-            </div>
-
-            <div class="form-group">
-                <label for="roundDuration">Minutes per Round:</label>
-                <input type="number" id="roundDuration" min="5" max="30" value="12" required>
-            </div>
-
-            <div class="form-group">
-                <label for="totalTime">Total Available Time (minutes):</label>
-                <input type="number" id="totalTime" min="30" max="180" value="90" required>
-            </div>
-
-            <div class="form-group checkbox-group">
-                <label>
-                    <input type="checkbox" id="useAnchors">
-                    Use Fixed Anchors (simplifies scheduling)
-                </label>
-            </div>
-
-            <div class="form-group" id="anchorInputs" style="display: none;">
-                <label>Anchor Names (one per table):</label>
-                <div id="anchorList"></div>
-            </div>
-
-            <button id="generateBtn" class="generate-btn">Generate Matrix</button>
+            <label for="totalPeople">Number of People:</label>
+            <input type="number" id="totalPeople" min="4" required>
+            <label for="numTables">Number of Tables:</label>
+            <input type="number" id="numTables" min="2" required>
+            <button id="generateBtn">Generate Matrix</button>
         </div>
 
         <div class="results-section" id="resultsSection" style="display: none;">
