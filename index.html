@@ -5,6 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trick Drive Matrix Generator</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .input-section-modern {
+            max-width: 400px;
+            margin: 40px auto 24px auto;
+            padding: 32px 32px 24px 32px;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.04);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .input-section-modern label {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #222;
+            align-self: flex-start;
+        }
+        .input-section-modern input[type="number"] {
+            width: 100%;
+            padding: 10px 14px;
+            margin-bottom: 18px;
+            border: 1.5px solid #d0d0d0;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            transition: border 0.2s;
+            outline: none;
+            background: #fafbfc;
+        }
+        .input-section-modern input[type="number"]:focus {
+            border: 1.5px solid #4f8cff;
+            background: #fff;
+        }
+        #generateBtn {
+            width: 100%;
+            padding: 12px 0;
+            background: linear-gradient(90deg, #4f8cff 0%, #38c6d9 100%);
+            color: #fff;
+            font-size: 1.15rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(79,140,255,0.08);
+            cursor: pointer;
+            transition: background 0.2s, box-shadow 0.2s;
+            margin-top: 8px;
+        }
+        #generateBtn:hover {
+            background: linear-gradient(90deg, #38c6d9 0%, #4f8cff 100%);
+            box-shadow: 0 4px 16px rgba(56,198,217,0.12);
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -13,11 +66,11 @@
             <p>Generate optimal seating arrangements for magic association performance nights</p>
         </header>
 
-        <div class="input-section">
-            <label for="totalPeople">Number of People:</label>
-            <input type="number" id="totalPeople" min="4" required>
-            <label for="numTables">Number of Tables:</label>
-            <input type="number" id="numTables" min="2" required>
+        <div class="input-section-modern">
+            <label for="totalPeople">Number of People</label>
+            <input type="number" id="totalPeople" min="4" required placeholder="e.g. 12">
+            <label for="numTables">Number of Tables</label>
+            <input type="number" id="numTables" min="2" required placeholder="e.g. 4">
             <button id="generateBtn">Generate Matrix</button>
         </div>
 
