@@ -114,12 +114,10 @@ class TrickDriveMatrix {
             ];
             return base.map((tables, r) => tables.map((members, t) => ({table: t+1, members})));
         }
-        // 2. Otherwise, use greedy best-spread algorithm
-        // Calculate people per table (never more than 4)
-        const peoplePerTable = Math.min(4, Math.ceil(totalPeople / numTables));
+        // 2. Otherwise, use greedy best-spread algorithm with new table size rule
         // Calculate minimum rounds needed for best coverage
-        const minRounds = Math.ceil((totalPeople - 1) / (peoplePerTable - 1));
-        // Build interaction matrix
+        // (peoplePerTable is not fixed, so we calculate distribution per round)
+        const minRounds = Math.ceil((totalPeople - 1) / 3); // 3 is the min per table
         const people = Array.from({length: totalPeople}, (_, i) => (i+1).toString());
         const interaction = {};
         for (let i = 0; i < totalPeople; i++) {
@@ -133,9 +131,47 @@ class TrickDriveMatrix {
             // Greedy: try to minimize repeats in this round
             const used = new Set();
             const roundTables = [];
-            for (let t = 0; t < numTables; t++) {
+            // Calculate table sizes for this round
+            let remaining = totalPeople;
+            let tablesLeft = numTables;
+            const tableSizes = [];
+            while (tablesLeft > 0) {
+                // If this is the last table, take all remaining people
+                if (tablesLeft === 1) {
+                    tableSizes.push(remaining);
+                    break;
+                }
+                // If we can split remaining people into (tablesLeft-1) tables of 3 or 4, do so
+                let minForRest = 3 * (tablesLeft - 1);
+                let maxForRest = 4 * (tablesLeft - 1);
+                let thisTable = 4;
+                if (remaining - thisTable < minForRest) {
+                    thisTable = 3;
+                }
+                // If even after this, the last table would be 2, only allow it if no other way
+                if (remaining - thisTable < 3 && remaining - thisTable > 0) {
+                    thisTable = remaining - 3 * (tablesLeft - 1);
+                    if (thisTable < 2) thisTable = 2;
+                }
+                tableSizes.push(thisTable);
+                remaining -= thisTable;
+                tablesLeft--;
+            }
+            // Enforce: at most one 2-person table
+            let twos = tableSizes.filter(x => x === 2).length;
+            if (twos > 1) {
+                // Convert extra 2s to 3s/4s if possible
+                for (let i = 0; i < tableSizes.length && twos > 1; i++) {
+                    if (tableSizes[i] === 2) {
+                        tableSizes[i] = 3;
+                        twos--;
+                    }
+                }
+            }
+            // Now assign people to tables
+            for (let t = 0, pIdx = 0; t < tableSizes.length; t++) {
                 const tableMembers = [];
-                while (tableMembers.length < peoplePerTable && used.size < totalPeople) {
+                while (tableMembers.length < tableSizes[t] && used.size < totalPeople) {
                     // Pick the person with the least total repeats so far
                     let bestPerson = null;
                     let bestScore = Infinity;
