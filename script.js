@@ -8,35 +8,6 @@ class TrickDriveMatrix {
 
     initializeEventListeners() {
         document.getElementById('generateBtn').addEventListener('click', () => this.generateMatrix());
-        document.getElementById('useAnchors').addEventListener('change', (e) => this.toggleAnchorInputs(e.target.checked));
-        document.getElementById('exportBtn').addEventListener('click', () => this.exportToCSV());
-        document.getElementById('printBtn').addEventListener('click', () => this.printSchedule());
-        
-        // Update anchor inputs when table count changes
-        document.getElementById('numTables').addEventListener('change', () => this.updateAnchorInputs());
-    }
-
-    toggleAnchorInputs(show) {
-        const anchorInputs = document.getElementById('anchorInputs');
-        anchorInputs.style.display = show ? 'block' : 'none';
-        if (show) {
-            this.updateAnchorInputs();
-        }
-    }
-
-    updateAnchorInputs() {
-        const numTables = parseInt(document.getElementById('numTables').value);
-        const anchorList = document.getElementById('anchorList');
-        anchorList.innerHTML = '';
-
-        for (let i = 0; i < numTables; i++) {
-            const div = document.createElement('div');
-            div.className = 'anchor-input';
-            div.innerHTML = `
-                <input type="text" placeholder="Anchor ${i + 1} name" id="anchor${i}">
-            `;
-            anchorList.appendChild(div);
-        }
     }
 
     generateMatrix() {
