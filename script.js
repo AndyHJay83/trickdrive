@@ -117,13 +117,11 @@ class TrickDriveMatrix {
         // 2. Prefer 3-4 per table over multiple 2-person tables
         let tables = numTables;
         if (totalPeople / tables < 3) {
-            // Find the largest number of tables such that all tables have at least 3 and at most 4 people
             for (let t = tables; t >= 1; t--) {
                 const minPerTable = Math.floor(totalPeople / t);
                 const maxPerTable = Math.ceil(totalPeople / t);
                 const numBigTables = totalPeople % t;
                 const numSmallTables = t - numBigTables;
-                // All tables have 3 or 4, or at most one 2-person table
                 if (
                     (minPerTable >= 3 && maxPerTable <= 4) ||
                     (minPerTable === 2 && maxPerTable <= 4 && numSmallTables === 1)
@@ -133,8 +131,7 @@ class TrickDriveMatrix {
                 }
             }
         }
-        // Now proceed with greedy best-spread algorithm as before, using 'tables' instead of numTables
-        const minRounds = Math.ceil((totalPeople - 1) / 3); // 3 is the min per table
+        // Set up interaction matrix
         const people = Array.from({length: totalPeople}, (_, i) => (i+1).toString());
         const interaction = {};
         for (let i = 0; i < totalPeople; i++) {
@@ -143,8 +140,18 @@ class TrickDriveMatrix {
                 if (i !== j) interaction[people[i]][people[j]] = 0;
             }
         }
+        // Calculate all possible pairs
+        const allPairs = new Set();
+        for (let i = 0; i < totalPeople; i++) {
+            for (let j = i+1; j < totalPeople; j++) {
+                allPairs.add(`${people[i]}-${people[j]}`);
+            }
+        }
         const schedule = [];
-        for (let round = 0; round < minRounds; round++) {
+        const minRounds = Math.ceil((totalPeople - 1) / 3); // 3 is the min per table
+        const maxRounds = 9;
+        let round = 0;
+        while (round < maxRounds) {
             // Greedy: try to minimize repeats in this round
             const used = new Set();
             const roundTables = [];
@@ -153,19 +160,16 @@ class TrickDriveMatrix {
             let tablesLeft = tables;
             const tableSizes = [];
             while (tablesLeft > 0) {
-                // If this is the last table, take all remaining people
                 if (tablesLeft === 1) {
                     tableSizes.push(remaining);
                     break;
                 }
-                // If we can split remaining people into (tablesLeft-1) tables of 3 or 4, do so
                 let minForRest = 3 * (tablesLeft - 1);
                 let maxForRest = 4 * (tablesLeft - 1);
                 let thisTable = 4;
                 if (remaining - thisTable < minForRest) {
                     thisTable = 3;
                 }
-                // If even after this, the last table would be 2, only allow it if no other way
                 if (remaining - thisTable < 3 && remaining - thisTable > 0) {
                     thisTable = remaining - 3 * (tablesLeft - 1);
                     if (thisTable < 2) thisTable = 2;
@@ -174,10 +178,8 @@ class TrickDriveMatrix {
                 remaining -= thisTable;
                 tablesLeft--;
             }
-            // Enforce: at most one 2-person table
             let twos = tableSizes.filter(x => x === 2).length;
             if (twos > 1) {
-                // Convert extra 2s to 3s/4s if possible
                 for (let i = 0; i < tableSizes.length && twos > 1; i++) {
                     if (tableSizes[i] === 2) {
                         tableSizes[i] = 3;
@@ -185,16 +187,13 @@ class TrickDriveMatrix {
                     }
                 }
             }
-            // Now assign people to tables
             for (let t = 0, pIdx = 0; t < tableSizes.length; t++) {
                 const tableMembers = [];
                 while (tableMembers.length < tableSizes[t] && used.size < totalPeople) {
-                    // Pick the person with the least total repeats so far
                     let bestPerson = null;
                     let bestScore = Infinity;
                     for (const p of people) {
                         if (used.has(p)) continue;
-                        // Score: sum of repeats with current table
                         let score = 0;
                         for (const m of tableMembers) {
                             score += interaction[p][m];
@@ -213,7 +212,6 @@ class TrickDriveMatrix {
                 }
                 if (tableMembers.length > 0) {
                     roundTables.push({table: t+1, members: tableMembers});
-                    // Update interaction matrix
                     for (let i = 0; i < tableMembers.length; i++) {
                         for (let j = i+1; j < tableMembers.length; j++) {
                             interaction[tableMembers[i]][tableMembers[j]]++;
@@ -223,8 +221,20 @@ class TrickDriveMatrix {
                 }
             }
             schedule.push(roundTables);
+            // After each round, check if all pairs have been covered
+            let allCovered = true;
+            for (let i = 0; i < totalPeople; i++) {
+                for (let j = i+1; j < totalPeople; j++) {
+                    if (interaction[people[i]][people[j]] === 0) {
+                        allCovered = false;
+                        break;
+                    }
+                }
+                if (!allCovered) break;
+            }
+            if (round+1 >= minRounds && allCovered) break;
+            round++;
         }
-        // Defensive fallback: always return an array
         if (!Array.isArray(schedule) || schedule.length === 0) {
             return [[]];
         }
