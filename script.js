@@ -67,23 +67,111 @@ class TrickDriveMatrix {
     }
 
     generateBestSchedule(totalPeople, numTables) {
-        // Try to use a perfect system if possible, otherwise use best possible
-        const maxPerTable = 4;
-        // Check for perfect Kirkman/Steiner system (triples)
-        if (maxPerTable === 3) {
-            if ((totalPeople === 6 && numTables === 2) ||
-                (totalPeople === 9 && numTables === 3) ||
-                (totalPeople === 12 && numTables === 4) ||
-                (totalPeople === 15 && numTables === 5)) {
-                const rounds = this.generateComplete6PersonSchedule(5); // etc. for each case
-                // ...
+        // 1. Check for perfect Kirkman/Steiner system (tables of 3)
+        if (totalPeople === 6 && numTables === 2) {
+            // 5 rounds, 2 tables of 3
+            const base = [
+                [[1,2,3],[4,5,6]],
+                [[1,4,5],[2,3,6]],
+                [[1,2,6],[3,4,5]],
+                [[1,3,5],[2,4,6]],
+                [[1,3,4],[2,5,6]]
+            ];
+            return base.map((tables, r) => tables.map((members, t) => ({table: t+1, members})));
+        }
+        if (totalPeople === 9 && numTables === 3) {
+            // 12 rounds, 3 tables of 3
+            const base = [
+                [[1,2,3],[4,5,6],[7,8,9]],
+                [[1,4,7],[2,5,8],[3,6,9]],
+                [[1,5,9],[2,6,7],[3,4,8]],
+                [[1,6,8],[2,4,9],[3,5,7]],
+                [[1,7,8],[2,3,5],[4,6,9]],
+                [[1,8,9],[2,4,7],[3,5,6]],
+                [[1,2,6],[3,7,9],[4,5,8]],
+                [[1,3,8],[2,5,9],[4,6,7]],
+                [[1,4,9],[2,3,7],[5,6,8]],
+                [[1,5,7],[2,6,8],[3,4,9]],
+                [[1,6,9],[2,4,8],[3,5,7]],
+                [[1,7,9],[2,3,8],[4,5,6]]
+            ];
+            return base.map((tables, r) => tables.map((members, t) => ({table: t+1, members})));
+        }
+        if (totalPeople === 12 && numTables === 4) {
+            // 11 rounds, 4 tables of 3
+            const base = [
+                [[1,2,3],[4,5,6],[7,8,9],[10,11,12]],
+                [[1,4,7],[2,5,8],[3,6,9],[10,11,12]],
+                [[1,5,9],[2,6,7],[3,4,8],[10,11,12]],
+                [[1,6,8],[2,4,9],[3,5,7],[10,11,12]],
+                [[1,7,8],[2,3,5],[4,6,9],[10,11,12]],
+                [[1,8,9],[2,4,7],[3,5,6],[10,11,12]],
+                [[1,2,6],[3,7,9],[4,5,8],[10,11,12]],
+                [[1,3,8],[2,5,9],[4,6,7],[10,11,12]],
+                [[1,4,9],[2,3,7],[5,6,8],[10,11,12]],
+                [[1,5,7],[2,6,8],[3,4,9],[10,11,12]],
+                [[1,6,9],[2,4,8],[3,5,7],[10,11,12]]
+            ];
+            return base.map((tables, r) => tables.map((members, t) => ({table: t+1, members})));
+        }
+        // 2. Otherwise, use greedy best-spread algorithm
+        // Calculate people per table (never more than 4)
+        const peoplePerTable = Math.min(4, Math.ceil(totalPeople / numTables));
+        // Calculate minimum rounds needed for best coverage
+        const minRounds = Math.ceil((totalPeople - 1) / (peoplePerTable - 1));
+        // Build interaction matrix
+        const people = Array.from({length: totalPeople}, (_, i) => (i+1).toString());
+        const interaction = {};
+        for (let i = 0; i < totalPeople; i++) {
+            interaction[people[i]] = {};
+            for (let j = 0; j < totalPeople; j++) {
+                if (i !== j) interaction[people[i]][people[j]] = 0;
             }
         }
-        // For now, fallback to existing Kirkman/Steiner/greedy logic, but always use max 4 per table
-        // ...
-        // Use the best possible schedule for the given input
-        // ...
-        // Return the schedule
+        const schedule = [];
+        for (let round = 0; round < minRounds; round++) {
+            // Greedy: try to minimize repeats in this round
+            const used = new Set();
+            const roundTables = [];
+            for (let t = 0; t < numTables; t++) {
+                const tableMembers = [];
+                while (tableMembers.length < peoplePerTable && used.size < totalPeople) {
+                    // Pick the person with the least total repeats so far
+                    let bestPerson = null;
+                    let bestScore = Infinity;
+                    for (const p of people) {
+                        if (used.has(p)) continue;
+                        // Score: sum of repeats with current table
+                        let score = 0;
+                        for (const m of tableMembers) {
+                            score += interaction[p][m];
+                        }
+                        if (score < bestScore) {
+                            bestScore = score;
+                            bestPerson = p;
+                        }
+                    }
+                    if (bestPerson) {
+                        tableMembers.push(bestPerson);
+                        used.add(bestPerson);
+                    } else {
+                        break;
+                    }
+                }
+                if (tableMembers.length > 0) {
+                    roundTables.push({table: t+1, members: tableMembers});
+                    // Update interaction matrix
+                    for (let i = 0; i < tableMembers.length; i++) {
+                        for (let j = i+1; j < tableMembers.length; j++) {
+                            interaction[tableMembers[i]][tableMembers[j]]++;
+                            interaction[tableMembers[j]][tableMembers[i]]++;
+                        }
+                    }
+                }
+            }
+            schedule.push(roundTables);
+        }
+        return schedule;
     }
 
     generatePeopleNames(count) {
@@ -1392,13 +1480,13 @@ class TrickDriveMatrix {
         const actualNumTables = Math.min(optimalNumTables, numTables);
         
         // Calculate base distribution (people per table)
-        const basePeoplePerTable = Math.floor(totalPeople / actualNumTables);
-        const remainder = totalPeople % actualNumTables;
+        const basePeoplePerTable = Math.floor(totalPeople / actualTables);
+        const remainder = totalPeople % actualTables;
         
         const distribution = [];
         
         // Distribute people evenly, with remainder spread across first few tables
-        for (let table = 0; table < actualNumTables; table++) {
+        for (let table = 0; table < actualTables; table++) {
             let peopleForThisTable = basePeoplePerTable;
             
             // Add one extra person to the first 'remainder' tables
