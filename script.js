@@ -95,7 +95,7 @@ class TrickDriveMatrix {
     }
 
     generateScheduleWithAnchors(inputs) {
-        const { numTables, maxPerTable } = inputs;
+        const { numTables } = inputs;
         
         // Get anchor names from inputs
         this.anchors = [];
@@ -116,7 +116,7 @@ class TrickDriveMatrix {
 
     generateSteinerSchedule(inputs, nonAnchors) {
         const schedule = [];
-        const distribution = this.calculateOptimalDistribution(nonAnchors.length, inputs.numTables, inputs.maxPerTable);
+        const distribution = this.calculateOptimalDistribution(nonAnchors.length, inputs.numTables, 4);
         const actualNumTables = distribution.length;
         
         // Use optimal algorithms for fixed anchors
@@ -342,7 +342,7 @@ class TrickDriveMatrix {
 
     convertNonAnchorRoundToTables(nonAnchorRound, inputs, actualNumTables) {
         const { maxPerTable } = inputs;
-        const distribution = this.calculateOptimalDistribution(nonAnchorRound.length, inputs.numTables, maxPerTable);
+        const distribution = this.calculateOptimalDistribution(nonAnchorRound.length, inputs.numTables, 4);
         
         const roundSchedule = [];
         let personIndex = 0;
@@ -382,7 +382,7 @@ class TrickDriveMatrix {
 
     generateAdvancedFixedAnchorRound(inputs, nonAnchors, actualNumTables, round) {
         const { maxPerTable } = inputs;
-        const distribution = this.calculateOptimalDistribution(nonAnchors.length, inputs.numTables, maxPerTable);
+        const distribution = this.calculateOptimalDistribution(nonAnchors.length, inputs.numTables, 4);
         
         const roundSchedule = [];
         const usedNonAnchors = new Set();
@@ -462,8 +462,8 @@ class TrickDriveMatrix {
     }
 
     generateOptimalRoundWithAnchors(inputs, nonAnchors) {
-        const { numTables, maxPerTable } = inputs;
-        const distribution = this.calculateOptimalDistribution(nonAnchors.length, numTables, maxPerTable);
+        const { numTables } = inputs;
+        const distribution = this.calculateOptimalDistribution(nonAnchors.length, numTables, 4);
         const actualNumTables = distribution.length;
         
         const roundSchedule = [];
@@ -493,12 +493,12 @@ class TrickDriveMatrix {
     }
 
     generateScheduleWithoutAnchors(inputs) {
-        const { numTables, maxPerTable } = inputs;
+        const { numTables } = inputs;
         const totalPeople = this.people.length;
 
         // Guarantee no repeat pairs for known Kirkman/Steiner systems
         // 6, 9, 12 people with tables of 3; 8, 10, 12, 14 people with tables of 4
-        if (totalPeople === 6 && numTables === 2 && maxPerTable === 3) {
+        if (totalPeople === 6 && numTables === 2) {
             this.schedule = [];
             const rounds = this.generateComplete6PersonSchedule(5);
             for (let round = 0; round < 5; round++) {
@@ -506,7 +506,7 @@ class TrickDriveMatrix {
             }
             return;
         }
-        if (totalPeople === 9 && numTables === 3 && maxPerTable === 3) {
+        if (totalPeople === 9 && numTables === 3) {
             this.schedule = [];
             const rounds = this.generateComplete9PersonSchedule(12);
             for (let round = 0; round < 12; round++) {
@@ -514,7 +514,7 @@ class TrickDriveMatrix {
             }
             return;
         }
-        if (totalPeople === 12 && numTables === 4 && maxPerTable === 3) {
+        if (totalPeople === 12 && numTables === 4) {
             this.schedule = [];
             const rounds = this.generateComplete12PersonSchedule(11);
             for (let round = 0; round < 11; round++) {
@@ -522,7 +522,7 @@ class TrickDriveMatrix {
             }
             return;
         }
-        if (totalPeople === 8 && numTables === 2 && maxPerTable === 4) {
+        if (totalPeople === 8 && numTables === 2) {
             this.schedule = [];
             const rounds = this.generateComplete8PersonSchedule(7);
             for (let round = 0; round < 7; round++) {
@@ -530,7 +530,7 @@ class TrickDriveMatrix {
             }
             return;
         }
-        if (totalPeople === 10 && numTables === 2 && maxPerTable === 5) {
+        if (totalPeople === 10 && numTables === 2) {
             this.schedule = [];
             const rounds = this.generateComplete10PersonSchedule(9);
             for (let round = 0; round < 9; round++) {
@@ -538,7 +538,7 @@ class TrickDriveMatrix {
             }
             return;
         }
-        if (totalPeople === 12 && numTables === 3 && maxPerTable === 4) {
+        if (totalPeople === 12 && numTables === 3) {
             this.schedule = [];
             const rounds = this.generateComplete12PersonSchedule(11);
             for (let round = 0; round < 11; round++) {
@@ -546,7 +546,7 @@ class TrickDriveMatrix {
             }
             return;
         }
-        if (totalPeople === 14 && numTables === 2 && maxPerTable === 7) {
+        if (totalPeople === 14 && numTables === 2) {
             this.schedule = [];
             const rounds = this.generateComplete14PersonSchedule(13);
             for (let round = 0; round < 13; round++) {
@@ -557,7 +557,7 @@ class TrickDriveMatrix {
 
         // Fallback to existing logic for all other cases
         // Use Latin Square and Block Design principles
-        const distribution = this.calculateOptimalDistribution(this.people.length, numTables, maxPerTable);
+        const distribution = this.calculateOptimalDistribution(this.people.length, numTables, 4);
         const actualNumTables = distribution.length;
 
         // Generate schedule using Kirkman Triple System or similar
@@ -833,8 +833,8 @@ class TrickDriveMatrix {
     }
 
     convertCompleteRoundToTables(round, inputs) {
-        const { numTables, maxPerTable } = inputs;
-        const distribution = this.calculateOptimalDistribution(this.people.length, numTables, maxPerTable);
+        const { numTables } = inputs;
+        const distribution = this.calculateOptimalDistribution(this.people.length, numTables, 4);
         const actualNumTables = distribution.length;
         
         const roundSchedule = [];
@@ -1024,8 +1024,8 @@ class TrickDriveMatrix {
     }
 
     convertRoundToTables(round, inputs) {
-        const { numTables, maxPerTable } = inputs;
-        const distribution = this.calculateOptimalDistribution(this.people.length, numTables, maxPerTable);
+        const { numTables } = inputs;
+        const distribution = this.calculateOptimalDistribution(this.people.length, numTables, 4);
         const actualNumTables = distribution.length;
         
         const roundSchedule = [];
@@ -1062,7 +1062,7 @@ class TrickDriveMatrix {
         // Use a round-robin tournament approach with systematic rotation
         for (let round = 0; round < this.optimalRounds; round++) {
             const roundSchedule = [];
-            const distribution = this.calculateOptimalDistribution(this.people.length, numTables, inputs.maxPerTable);
+            const distribution = this.calculateOptimalDistribution(this.people.length, numTables, 4);
             
             // Create a systematic rotation pattern
             const rotatedPeople = this.rotatePeople(round);
@@ -1210,8 +1210,8 @@ class TrickDriveMatrix {
     }
 
     generateOptimalRoundAdvanced(inputs, roundNumber) {
-        const { numTables, maxPerTable } = inputs;
-        const distribution = this.calculateOptimalDistribution(this.people.length, numTables, maxPerTable);
+        const { numTables } = inputs;
+        const distribution = this.calculateOptimalDistribution(this.people.length, numTables, 4);
         const actualNumTables = distribution.length;
         
         const roundSchedule = [];
@@ -1322,8 +1322,8 @@ class TrickDriveMatrix {
     }
 
     generateOptimalRound(inputs) {
-        const { numTables, maxPerTable } = inputs;
-        const distribution = this.calculateOptimalDistribution(this.people.length, numTables, maxPerTable);
+        const { numTables } = inputs;
+        const distribution = this.calculateOptimalDistribution(this.people.length, numTables, 4);
         const actualNumTables = distribution.length;
         
         const roundSchedule = [];
@@ -1488,7 +1488,7 @@ class TrickDriveMatrix {
     }
 
     displayResults(inputs) {
-        const { totalPeople, numTables, maxPerTable, roundDuration, totalTime } = inputs;
+        const { totalPeople, numTables, roundDuration, totalTime } = inputs;
         
         // Display summary
         this.displaySummary(inputs);
