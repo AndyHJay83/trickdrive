@@ -163,8 +163,6 @@ class TrickDriveMatrix {
         return this.generateCompleteSystematicNonAnchorRounds(nonAnchors, totalRounds);
     }
 
-
-
     generateComplete6PersonNonAnchorSchedule(totalRounds) {
         const baseRounds = [
             [0,1,2,3,4,5],
@@ -301,8 +299,6 @@ class TrickDriveMatrix {
         
         return rounds;
     }
-
-
 
     rotateNonAnchorsSystematic(nonAnchors, round, n) {
         const people = [...nonAnchors];
@@ -1126,8 +1122,6 @@ class TrickDriveMatrix {
         
         return rounds;
     }
-
-
 
     generateFiniteProjectiveGroups(n, maxPerTable, round) {
         const groups = [];
