@@ -114,9 +114,26 @@ class TrickDriveMatrix {
             ];
             return base.map((tables, r) => tables.map((members, t) => ({table: t+1, members})));
         }
-        // 2. Otherwise, use greedy best-spread algorithm with new table size rule
-        // Calculate minimum rounds needed for best coverage
-        // (peoplePerTable is not fixed, so we calculate distribution per round)
+        // 2. Prefer 3-4 per table over multiple 2-person tables
+        let tables = numTables;
+        if (totalPeople / tables < 3) {
+            // Find the largest number of tables such that all tables have at least 3 and at most 4 people
+            for (let t = tables; t >= 1; t--) {
+                const minPerTable = Math.floor(totalPeople / t);
+                const maxPerTable = Math.ceil(totalPeople / t);
+                const numBigTables = totalPeople % t;
+                const numSmallTables = t - numBigTables;
+                // All tables have 3 or 4, or at most one 2-person table
+                if (
+                    (minPerTable >= 3 && maxPerTable <= 4) ||
+                    (minPerTable === 2 && maxPerTable <= 4 && numSmallTables === 1)
+                ) {
+                    tables = t;
+                    break;
+                }
+            }
+        }
+        // Now proceed with greedy best-spread algorithm as before, using 'tables' instead of numTables
         const minRounds = Math.ceil((totalPeople - 1) / 3); // 3 is the min per table
         const people = Array.from({length: totalPeople}, (_, i) => (i+1).toString());
         const interaction = {};
@@ -133,7 +150,7 @@ class TrickDriveMatrix {
             const roundTables = [];
             // Calculate table sizes for this round
             let remaining = totalPeople;
-            let tablesLeft = numTables;
+            let tablesLeft = tables;
             const tableSizes = [];
             while (tablesLeft > 0) {
                 // If this is the last table, take all remaining people
